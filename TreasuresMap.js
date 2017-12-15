@@ -34,9 +34,10 @@ function resolveTreasures(input) {
 
     let a = adventurers[0];
     while (a.hasMove()) {
-        a.move();
+        let nextPos = a.nextPosition();
+        if (!mountains.some(m => m.x == nextPos.x && m.y == nextPos.y))
+            a.move(nextPos);
     }
-
     return {
         map: map,
         mountains: mountains,
@@ -85,61 +86,64 @@ function parseAdventurer(line) {
         hasMove() {
             return this.moves.length != 0;
         },
-        nextMove: function () {
-            return this.moves[0];
+        nextMove() {
+            return this.moves.shift();
         },
-        move() {
+        nextPosition: function () {
             switch (this.nextMove()) {
-                case 'A':
-                    this.advance();
-                    break;
-                case 'D':
-                    this.turnRight();
-                    break;
-                case 'G':
-                    this.turnLeft();
-                    break;
+                case 'A': return this.advancePosition();
+                case 'D': return this.turnRightPosition();
+                case 'G': return this.turnLeftPosition();
+                default: throw Error("Invalid move: " + this.orientation);
             }
-            this.moves.shift();
         },
-        advance() {
+        move(nextPos) {
+            this.x = nextPos.x;
+            this.y = nextPos.y;
+            this.orientation = nextPos.orientation;
+        },
+        advancePosition() {
             if (this.orientation === 'N') {
-                this.y -= 1;
+                return {x:this.x, y:this.y-1, orientation:this.orientation};
             } else if (this.orientation === 'S') {
-                this.y += 1;
+                return {x:this.x, y:this.y+1, orientation:this.orientation};
             } else if (this.orientation === 'E') {
-                this.x += 1;
+                return {x:this.x+1, y:this.y, orientation:this.orientation};
             } else if (this.orientation === 'W') {
-                this.x -= 1;
+                return {x:this.x, y:this.y-1, orientation:this.orientation};
             } else {
                 throw Error("Invalid orientation: " + this.orientation);
             }
         },
-        turnLeft() {
+        turnLeftPosition() {
+            let nextOrientation;
             if (this.orientation === 'N') {
-                this.orientation = 'W';
+                nextOrientation = 'W';
             } else if (this.orientation === 'S') {
-                this.orientation = 'E';
+                nextOrientation = 'E';
             } else if (this.orientation === 'E') {
-                this.orientation = 'N';
+                nextOrientation = 'N';
             } else if (this.orientation === 'W') {
-                this.orientation = 'S';
+                nextOrientation = 'S';
             } else {
                 throw Error("Invalid orientation: " + this.orientation);
             }
+            return {x:this.x, y:this.y, orientation:nextOrientation};
         },
-        turnRight() {
+        turnRightPosition() {
+            let nextOrientation;
             if (this.orientation === 'N') {
-                this.orientation = 'E';
+                nextOrientation = 'E';
             } else if (this.orientation === 'S') {
-                this.orientation = 'W';
+                nextOrientation = 'W';
             } else if (this.orientation === 'E') {
-                this.orientation = 'S';
+                nextOrientation = 'S';
             } else if (this.orientation === 'W') {
-                this.orientation = 'N';
+                nextOrientation = 'N';
             } else {
                 throw Error("Invalid orientation: " + this.orientation);
             }
+            return {x:this.x, y:this.y, orientation:nextOrientation};
         }
     };
 }
