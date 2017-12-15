@@ -32,11 +32,19 @@ function resolveTreasures(input) {
     let treasures = parse('T', lines, parseTreasure);
     let adventurers = parse('A', lines, parseAdventurer);
 
-    let a = adventurers[0];
-    while (a.hasMove()) {
-        let nextPos = a.nextPosition();
-        if (!mountains.some(m => m.x == nextPos.x && m.y == nextPos.y))
-            a.move(nextPos);
+    let adventurer = adventurers[0];
+    while (adventurer.hasMove()) {
+        let nextPos = adventurer.nextPosition();
+        if (!mountains.some(m => m.x == nextPos.x && m.y == nextPos.y)) {
+
+            let cellTreasures = treasures.filter(t => t.x == nextPos.x && t.y == nextPos.y && t.count > 0);
+            if (cellTreasures.length > 0) {
+                cellTreasures[0].decrement();
+                adventurer.incTreasures();
+            }
+
+            adventurer.move(nextPos);
+        }
     }
     return {
         map: map,
@@ -71,7 +79,10 @@ function parseTreasure(line) {
     return {
         x: parseInt(t[1]),
         y: parseInt(t[2]),
-        count: parseInt(t[3])
+        count: parseInt(t[3]),
+        decrement() {
+            this.count--;
+        }
     };
 }
 
@@ -83,6 +94,7 @@ function parseAdventurer(line) {
         y: parseInt(adventurer[3]),
         orientation: adventurer[4],
         moves: adventurer[5].split(''),
+        treasures: 0,
         hasMove() {
             return this.moves.length != 0;
         },
@@ -91,10 +103,14 @@ function parseAdventurer(line) {
         },
         nextPosition: function () {
             switch (this.nextMove()) {
-                case 'A': return this.advancePosition();
-                case 'D': return this.turnRightPosition();
-                case 'G': return this.turnLeftPosition();
-                default: throw Error("Invalid move: " + this.orientation);
+                case 'A':
+                    return this.advancePosition();
+                case 'D':
+                    return this.turnRightPosition();
+                case 'G':
+                    return this.turnLeftPosition();
+                default:
+                    throw Error("Invalid move: " + this.orientation);
             }
         },
         move(nextPos) {
@@ -104,13 +120,13 @@ function parseAdventurer(line) {
         },
         advancePosition() {
             if (this.orientation === 'N') {
-                return {x:this.x, y:this.y-1, orientation:this.orientation};
+                return {x: this.x, y: this.y - 1, orientation: this.orientation};
             } else if (this.orientation === 'S') {
-                return {x:this.x, y:this.y+1, orientation:this.orientation};
+                return {x: this.x, y: this.y + 1, orientation: this.orientation};
             } else if (this.orientation === 'E') {
-                return {x:this.x+1, y:this.y, orientation:this.orientation};
+                return {x: this.x + 1, y: this.y, orientation: this.orientation};
             } else if (this.orientation === 'W') {
-                return {x:this.x, y:this.y-1, orientation:this.orientation};
+                return {x: this.x - 1, y: this.y, orientation: this.orientation};
             } else {
                 throw Error("Invalid orientation: " + this.orientation);
             }
@@ -128,7 +144,7 @@ function parseAdventurer(line) {
             } else {
                 throw Error("Invalid orientation: " + this.orientation);
             }
-            return {x:this.x, y:this.y, orientation:nextOrientation};
+            return {x: this.x, y: this.y, orientation: nextOrientation};
         },
         turnRightPosition() {
             let nextOrientation;
@@ -143,7 +159,10 @@ function parseAdventurer(line) {
             } else {
                 throw Error("Invalid orientation: " + this.orientation);
             }
-            return {x:this.x, y:this.y, orientation:nextOrientation};
+            return {x: this.x, y: this.y, orientation: nextOrientation};
+        },
+        incTreasures() {
+            this.treasures++;
         }
     };
 }
