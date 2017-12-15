@@ -1,0 +1,18 @@
+{
+  "name": "treasures-map",
+  "version": "1.0.0",
+  "description": "Treasures map kata",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/test.js",
+    "watch": "gulp watch"
+  },
+  "author": "Afloch",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "gulp": "^3.9.1",
+    "gulp-mocha": "^3.0.1",
+    "gulp-util": "^3.0.7",
+    "mocha": "^3.0.2"
+  }
+}
